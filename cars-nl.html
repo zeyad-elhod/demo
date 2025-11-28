@@ -13,10 +13,19 @@
     button:disabled{opacity:0.6; cursor:not-allowed}
     .status{margin:10px 0 0; color:#333}
     .error{color:#b00020}
+    .muted{color:var(--muted)}
     .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0}
     .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-top:16px}
     .card{background:#f7f9fb; border:1px solid #e6eef6; border-radius:10px; padding:12px; display:none}
     .card h3{margin:0 0 8px; font-size:15px; color:#0b66c2}
+    .card-top{display:flex; justify-content:space-between; align-items:center; gap:10px}
+    .pill{background:var(--accent); color:white; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700}
+    .rows-content{background:white; border:1px solid #d7e1eb; border-radius:8px; padding:10px; min-height:80px}
+    .rows-content.muted{color:var(--muted)}
+    .table-wrap{overflow:auto}
+    .data-table{width:100%; border-collapse:collapse; font-size:14px}
+    .data-table th, .data-table td{padding:8px 10px; border:1px solid #e6eef6; text-align:left}
+    .data-table th{background:#f1f6fb; position:sticky; top:0; z-index:1}
     pre{margin:0; background:white; border:1px solid #d7e1eb; border-radius:8px; padding:10px; white-space:pre-wrap; word-break:break-word; font-size:14px}
   </style>
 </head>
@@ -47,8 +56,11 @@
           <pre id="sql-output">(waiting)</pre>
         </div>
         <div class="card" id="rows-card">
-          <h3>Result rows</h3>
-          <pre id="rows-output">[]</pre>
+          <div class="card-top">
+            <h3>Results</h3>
+            <span id="row-count" class="pill">0 rows</span>
+          </div>
+          <div id="rows-output" class="rows-content muted">Awaiting query.</div>
         </div>
       </div>
     </section>
@@ -63,11 +75,104 @@
       const rowsCard = document.getElementById('rows-card');
       const sqlOutput = document.getElementById('sql-output');
       const rowsOutput = document.getElementById('rows-output');
+      const rowCount = document.getElementById('row-count');
       const askBtn = document.getElementById('ask-btn');
 
       function setStatus(text, isError){
         statusEl.textContent = text;
         statusEl.className = isError ? 'status error' : 'status';
+      }
+
+      function renderRows(rows){
+        let count = 0;
+        rowsOutput.innerHTML = '';
+        rowsOutput.className = 'rows-content';
+
+        if (Array.isArray(rows)) {
+          count = rows.length;
+          rowCount.textContent = count === 1 ? '1 row' : `${count} rows`;
+          if (!rows.length) {
+            rowsOutput.textContent = 'No rows returned.';
+            rowsOutput.classList.add('muted');
+            return;
+          }
+          const keys = Object.keys(rows[0] || {});
+          if (!keys.length) {
+            rowsOutput.textContent = 'Rows returned but no columns to show.';
+            rowsOutput.classList.add('muted');
+            return;
+          }
+          const table = document.createElement('table');
+          table.className = 'data-table';
+          const thead = document.createElement('thead');
+          const headerRow = document.createElement('tr');
+          keys.forEach(k => {
+            const th = document.createElement('th');
+            th.textContent = k;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+          const tbody = document.createElement('tbody');
+          rows.forEach(row => {
+            const tr = document.createElement('tr');
+            keys.forEach(k => {
+              const td = document.createElement('td');
+              const val = row && Object.prototype.hasOwnProperty.call(row, k) ? row[k] : '';
+              td.textContent = val === null || typeof val === 'undefined' ? '' : val;
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          const wrap = document.createElement('div');
+          wrap.className = 'table-wrap';
+          wrap.appendChild(table);
+          rowsOutput.appendChild(wrap);
+          return;
+        }
+
+        if (rows && typeof rows === 'object') {
+          const keys = Object.keys(rows);
+          if (!keys.length) {
+            rowCount.textContent = '0 rows';
+            rowsOutput.textContent = 'No data returned.';
+            rowsOutput.classList.add('muted');
+            return;
+          }
+          count = 1;
+          rowCount.textContent = '1 row';
+          const table = document.createElement('table');
+          table.className = 'data-table';
+          const thead = document.createElement('thead');
+          const headerRow = document.createElement('tr');
+          keys.forEach(k => {
+            const th = document.createElement('th');
+            th.textContent = k;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+          const tbody = document.createElement('tbody');
+          const tr = document.createElement('tr');
+          keys.forEach(k => {
+            const td = document.createElement('td');
+            const val = Object.prototype.hasOwnProperty.call(rows, k) ? rows[k] : '';
+            td.textContent = val === null || typeof val === 'undefined' ? '' : val;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+          table.appendChild(tbody);
+          const wrap = document.createElement('div');
+          wrap.className = 'table-wrap';
+          wrap.appendChild(table);
+          rowsOutput.appendChild(wrap);
+          return;
+        }
+
+        rowCount.textContent = '0 rows';
+        rowsOutput.textContent = rows === null || typeof rows === 'undefined' ? 'No data returned.' : String(rows);
+        rowsOutput.classList.add('muted');
       }
 
       form.addEventListener('submit', async (event) => {
@@ -83,7 +188,10 @@
         sqlCard.style.display = 'none';
         rowsCard.style.display = 'none';
         sqlOutput.textContent = '';
-        rowsOutput.textContent = '';
+        rowCount.textContent = '—';
+        rowsOutput.innerHTML = '';
+        rowsOutput.className = 'rows-content muted';
+        rowsOutput.textContent = 'Waiting...';
 
         try {
           const response = await fetch('/api/nl-query', {
@@ -114,7 +222,7 @@
           const rows = data && typeof data.rows !== 'undefined' ? data.rows : data;
 
           sqlOutput.textContent = sql || '(no SQL returned)';
-          rowsOutput.textContent = rows ? JSON.stringify(rows, null, 2) : '[]';
+          renderRows(rows);
           sqlCard.style.display = 'block';
           rowsCard.style.display = 'block';
           setStatus('Query succeeded.');
