@@ -55,6 +55,21 @@ export default async function handler(req, res) {
     const sql = (groqData?.choices?.[0]?.message?.content || '').trim();
 
     console.log('Generated SQL:', sql);
+    console.log('Generated SQL from Groq:', sql);
+
+    const sqlUpper = sql.toUpperCase().trim();
+    if (!(sqlUpper.startsWith('SELECT') || sqlUpper.startsWith('WITH'))) {
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(400).json({ error: 'LLM produced non-SELECT SQL', sql });
+    }
+    const forbidden = ['DELETE', 'UPDATE', 'INSERT', 'DROP', 'ALTER', 'TRUNCATE', 'CREATE', 'REPLACE', 'MERGE'];
+    for (const kw of forbidden) {
+      const re = new RegExp(`\\b${kw}\\b`, 'i');
+      if (re.test(sql)) {
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(400).json({ error: 'LLM produced unsafe SQL', sql });
+      }
+    }
 
     const queryUrl = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}/api/query`;
     const queryResponse = await fetch(queryUrl, {
@@ -67,7 +82,10 @@ export default async function handler(req, res) {
 
     if (!queryResponse.ok) {
       res.setHeader('Content-Type', 'application/json');
-      return res.status(queryResponse.status).json(queryData);
+      return res.status(queryResponse.status).json({
+        error: queryData.error || 'Query failed',
+        sql,
+      });
     }
 
     res.setHeader('Content-Type', 'application/json');
