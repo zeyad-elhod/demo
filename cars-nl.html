@@ -15,6 +15,21 @@
     .error{color:#b00020}
     .muted{color:var(--muted)}
     .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0}
+    .how-btn{background:white; color:var(--accent); border:1px solid #d7e1eb; padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(15,23,42,0.08)}
+    .how-btn:hover{filter:brightness(0.98)}
+    .modal-overlay{position:fixed; inset:0; background:rgba(19,33,68,0.4); display:none; align-items:center; justify-content:center; padding:16px; z-index:1000; opacity:0; transition:opacity 0.2s ease}
+    .modal-overlay.show{display:flex; opacity:1}
+    .modal-card{background:white; max-width:720px; width:100%; border-radius:14px; box-shadow:0 18px 38px rgba(15,23,42,0.18); padding:22px; position:relative; max-height:90vh; overflow:auto}
+    .modal-card h3{margin:0 0 10px; color:var(--accent)}
+    .modal-card p{margin:0 0 12px; line-height:1.6}
+    .modal-card .bullets{margin:8px 0 16px; padding-left:18px}
+    .modal-card .bullets li{margin:6px 0; line-height:1.5}
+    .modal-close{position:absolute; top:10px; right:10px; border:none; background:transparent; font-size:18px; cursor:pointer; color:#555}
+    .modal-close:hover{color:#111}
+    @media (max-width:520px){
+      .modal-card{padding:16px}
+      .how-btn{width:100%}
+    }
     .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-top:16px}
     .card{background:#f7f9fb; border:1px solid #e6eef6; border-radius:10px; padding:12px; display:none}
     .card h3{margin:0 0 8px; font-size:15px; color:#0b66c2}
@@ -36,6 +51,7 @@
         <h1 class="name">Cars NL Query</h1>
         <p class="title">Ask natural-language questions; see SQL + results.</p>
       </div>
+      <button id="how-btn" class="how-btn" type="button">What is this?</button>
     </header>
 
     <section class="section">
@@ -66,6 +82,34 @@
     </section>
   </main>
 
+  <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" type="button" aria-label="Close modal">&times;</button>
+      <h3 id="modal-title">What is this?</h3>
+      <p>This is an AI-powered Car Search Assistant.<br>
+      Instead of writing SQL or filtering manually, you can simply type what you want in natural language:</p>
+      <p>Example prompts you can try:</p>
+      <ul class="bullets">
+        <li>“Show all BMW cars newer than 2018 under 80,000 km.”</li>
+        <li>“List the top 5 cheapest diesel cars.”</li>
+        <li>“Show automatic SUVs sorted by mileage ascending.”</li>
+        <li>“Show cars with no accident history and price under 10,000.”</li>
+      </ul>
+      <p>The assistant understands your intent, turns it into SQL, validates it for safety, and returns clean, structured data from the cars database.</p>
+      <h3>How This Works (Technical Overview)</h3>
+      <p>This demo shows a complete AI → SQL → DB pipeline running fully serverless:</p>
+      <ul class="bullets">
+        <li>A Groq LLM interprets plain-English questions.</li>
+        <li>The LLM generates SQL that is automatically cleaned and validated.</li>
+        <li>A custom safety layer ensures the SQL is read-only (SELECT/WITH only).</li>
+        <li>A serverless SQLite engine executes the query on the cars database.</li>
+        <li>Results are rendered as a dynamic, responsive HTML table.</li>
+      </ul>
+      <p>The app demonstrates modern agentic AI patterns:<br>
+      natural-language reasoning, safe tool-calling, database interaction, and serverless execution — all deployed on Vercel.</p>
+    </div>
+  </div>
+
   <script>
     (function(){
       const form = document.getElementById('ask-form');
@@ -77,6 +121,9 @@
       const rowsOutput = document.getElementById('rows-output');
       const rowCount = document.getElementById('row-count');
       const askBtn = document.getElementById('ask-btn');
+      const howBtn = document.getElementById('how-btn');
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modalClose = modalOverlay.querySelector('.modal-close');
 
       function setStatus(text, isError){
         statusEl.textContent = text;
@@ -174,6 +221,22 @@
         rowsOutput.textContent = rows === null || typeof rows === 'undefined' ? 'No data returned.' : String(rows);
         rowsOutput.classList.add('muted');
       }
+
+      function openModal(){
+        modalOverlay.classList.add('show');
+        modalOverlay.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeModal(){
+        modalOverlay.classList.remove('show');
+        modalOverlay.setAttribute('aria-hidden', 'true');
+      }
+
+      howBtn.addEventListener('click', openModal);
+      modalClose.addEventListener('click', closeModal);
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeModal();
+      });
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
