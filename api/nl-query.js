@@ -38,7 +38,7 @@ export default async function handler(req, res) {
           {
             role: 'system',
             content:
-              'You are a SQL generator for a used cars database. The database has a table named cars with columns: id, brand, model, year, mileage_km, price_eur, accident_history, fuel_type, transmission. Respond ONLY with a valid SQL SELECT or WITH query on the cars table. No explanations. Never generate DELETE, UPDATE, INSERT, or any DDL.',
+              'You are a SQL generator for a used cars database. The database has a table named cars with columns: id, brand, model, year, mileage_km, price_eur, accident_history, fuel_type, transmission. Respond ONLY with raw SQL. No backticks. No markdown. No ```sql``` fences. No explanations. The SQL output MUST begin directly with SELECT or WITH. Never generate DELETE, UPDATE, INSERT, or any DDL.',
           },
           { role: 'user', content: question },
         ],
@@ -52,7 +52,12 @@ export default async function handler(req, res) {
     }
 
     const groqData = await groqResponse.json();
-    const sql = (groqData?.choices?.[0]?.message?.content || '').trim();
+    let sql = groqData?.choices?.[0]?.message?.content || '';
+    sql = sql.trim();
+    sql = sql.replace(/^```sql/i, '');
+    sql = sql.replace(/^```/i, '');
+    sql = sql.replace(/```$/i, '');
+    sql = sql.trim();
 
     console.log('Generated SQL:', sql);
     console.log('Generated SQL from Groq:', sql);
