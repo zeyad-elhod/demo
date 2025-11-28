@@ -1,79 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cars AI Project</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    .table-wrap{overflow:auto; margin-top:12px}
-    table{width:100%; border-collapse:collapse}
-    th,td{padding:8px 10px; border:1px solid #e6eef6; text-align:left}
-    th{background:#f1f6fb}
-  </style>
+  <meta charset="UTF-8">
+  <title>Cars AI SQL Tester</title>
 </head>
 <body>
-  <main class="container">
-    <header class="header">
-      <h1 class="name">Cars AI Project</h1>
-    </header>
-
-    <section class="section">
-      <p>Below are sample rows from the bundled `cars.db`:</p>
-      <div id="status">Loading…</div>
-      <div class="table-wrap" id="table-wrap" style="display:none"></div>
-    </section>
-  </main>
+  <h2>Test /api/query Endpoint</h2>
+  <label for="sql">SQL Query:</label><br>
+  <textarea id="sql" rows="8" cols="60" placeholder="Type your SQL query here..."></textarea><br><br>
+  <button id="runBtn">Run SQL</button>
+  <h3>Result:</h3>
+  <pre id="result"></pre>
 
   <script>
-    async function loadCars(){
-      const status = document.getElementById('status');
-      const wrap = document.getElementById('table-wrap');
-      try{
-        const res = await fetch('/api/cars');
-        // attempt to parse JSON body (may contain error message)
-        let body;
-        try{ body = await res.json(); }catch(e){ body = null }
-        if(!res.ok){
-          const msg = body && (body.message || body.error) ? (body.message || body.error) : `HTTP ${res.status}`;
-          throw new Error(msg);
-        }
-        const rows = body || [];
-        if(!Array.isArray(rows)) throw new Error('Invalid data');
-        if(rows.length === 0){
-          status.textContent = 'No rows returned.';
-          return;
-        }
-        status.style.display = 'none';
-        wrap.style.display = 'block';
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-        // build headers from keys of first row
-        Object.keys(rows[0]).forEach(k => {
-          const th = document.createElement('th');
-          th.textContent = k;
-          headerRow.appendChild(th);
+    document.getElementById('runBtn').onclick = async function() {
+      const sql = document.getElementById('sql').value;
+      const resultEl = document.getElementById('result');
+      resultEl.textContent = 'Running...';
+      try {
+        const response = await fetch('/api/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ sql })
         });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-        const tbody = document.createElement('tbody');
-        rows.forEach(r => {
-          const tr = document.createElement('tr');
-          Object.keys(r).forEach(k => {
-            const td = document.createElement('td');
-            td.textContent = r[k] === null ? '' : r[k];
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-        wrap.appendChild(table);
-      }catch(err){
-        status.textContent = 'Failed to load data: ' + (err.message || err);
+        const data = await response.json();
+        if (response.status === 200) {
+          resultEl.textContent = JSON.stringify(data, null, 2);
+        } else if (response.status === 400 || response.status === 500) {
+          resultEl.textContent = data.error || 'Unknown error';
+        } else {
+          resultEl.textContent = 'Unexpected response status: ' + response.status;
+        }
+      } catch (err) {
+        resultEl.textContent = 'Network or parsing error: ' + err;
       }
-    }
-    loadCars();
+    };
   </script>
 </body>
 </html>
