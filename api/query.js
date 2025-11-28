@@ -9,7 +9,6 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Parse JSON body
     let body;
     if (req.body && typeof req.body === 'object') {
       body = req.body;
@@ -28,13 +27,11 @@ export default async function handler(req, res) {
 
     const sqlNorm = sql.toUpperCase().trim();
 
-    // Allow only SELECT or WITH at the start
     if (!(sqlNorm.startsWith('SELECT') || sqlNorm.startsWith('WITH'))) {
       res.setHeader('Content-Type', 'application/json');
       return res.status(400).json({ error: 'Unsafe SQL' });
     }
 
-    // Forbidden keywords
     const forbidden = ['DELETE', 'UPDATE', 'INSERT', 'DROP', 'ALTER', 'TRUNCATE', 'CREATE', 'REPLACE', 'MERGE'];
     for (const kw of forbidden) {
       const re = new RegExp('\\b' + kw + '\\b', 'i');
@@ -44,15 +41,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // Initialize sql.js with local wasm
     const SQL = await initSqlJs({
       locateFile: (file) => path.join(process.cwd(), 'node_modules/sql.js/dist', file),
     });
 
-    // Load DB file from ./cars.db or ./data/cars.db
-    const primaryDbPath = path.join(process.cwd(), 'cars.db');
-    const dataDbPath = path.join(process.cwd(), 'data', 'cars.db');
-    const dbPath = fs.existsSync(primaryDbPath) ? primaryDbPath : dataDbPath;
+    const dbPath = path.join(process.cwd(), 'cars.db');
 
     if (!fs.existsSync(dbPath)) {
       res.setHeader('Content-Type', 'application/json');
@@ -65,7 +58,6 @@ export default async function handler(req, res) {
     // Execute the query
     const results = db.exec(sql);
 
-    // Convert results to array of objects
     const rows = [];
     for (const result of results) {
       const { columns, values } = result;
