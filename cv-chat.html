@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CV RAG Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --accent: #22d3ee;
+      --accent-strong: #0ea5e9;
+      --card-radius: 16px;
+      --glow: 0 10px 40px rgba(34, 211, 238, 0.15);
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --accent: #0ea5e9;
+      --accent-strong: #0369a1;
+      --glow: 0 10px 40px rgba(14, 165, 233, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 10% 20%, rgba(34, 211, 238, 0.08), transparent 25%), 
+                  radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 22%),
+                  var(--bg);
+      color: var(--text);
+      font-family: "Space Grotesk", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(34,211,238,0.06), transparent);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+    }
+    .pill {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--accent-strong);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+    }
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .theme-toggle:hover { transform: translateY(-1px); border-color: var(--accent); }
+    h1 { margin: 22px 0 8px; font-size: 46px; letter-spacing: -0.8px; }
+    .sub {
+      margin: 0 0 28px;
+      color: var(--muted);
+      max-width: 720px;
+      font-size: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 22px;
+      box-shadow: var(--glow);
+    }
+    .card h2 { margin: 0 0 6px; font-size: 18px; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; }
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      padding: 14px;
+      font-family: inherit;
+      font-size: 15px;
+      resize: vertical;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+    }
+    .controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: #0b1120;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--glow);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    button.primary:disabled { opacity: 0.7; cursor: not-allowed; }
+    button.primary:hover:not(:disabled) { transform: translateY(-1px); }
+    .status { color: var(--muted); font-size: 14px; display: flex; gap: 6px; align-items: center; }
+    .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 6px rgba(34,211,238,0.12); }
+    .status.error { color: #f87171; }
+    .status.error .dot { background: #f87171; box-shadow: 0 0 0 6px rgba(248,113,113,0.12); }
+    .answer-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 120px;
+      background: rgba(255,255,255,0.02);
+      white-space: pre-wrap;
+    }
+    .source-list { display: grid; gap: 12px; margin-top: 12px; }
+    .source {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+    .source-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .source small { color: var(--muted); }
+    .source p { margin: 8px 0 0; color: var(--text); }
+    .muted { color: var(--muted); }
+    .example-prompts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .prompt-btn {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.1s ease;
+      font-size: 13px;
+    }
+    .prompt-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+    @media (max-width: 900px) {
+      h1 { font-size: 36px; }
+      .grid { grid-template-columns: 1fr; }
+      header { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <span>🧠 CV RAG Chat</span>
+        <span class="pill" id="mode-pill">Vector search</span>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">☀️</button>
+    </header>
+
+    <main>
+      <h1>Ask my CV anything.</h1>
+      <p class="sub">A retrieval-augmented chat over my resume stored in SQLite. Your question is embedded, the closest CV chunks are fed to Groq (Llama 3.3 70B), and you get a grounded answer.</p>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Ask about my experience</h2>
+          <label for="question">Question</label>
+          <textarea id="question" placeholder="Examples: What performance tooling have I led? / What CI/CD work have I done?" required></textarea>
+          <div class="controls">
+            <button class="primary" id="ask-btn" type="button">Ask Groq</button>
+            <div id="status" class="status"><span class="dot"></span><span>Ready</span></div>
+          </div>
+          <div class="example-prompts">
+            <button class="prompt-btn" data-prompt="What automation frameworks have I built recently?">Automation frameworks built</button>
+            <button class="prompt-btn" data-prompt="Summarize my performance testing experience.">Performance testing experience</button>
+            <button class="prompt-btn" data-prompt="What CI/CD responsibilities do I mention?">CI/CD responsibilities</button>
+            <button class="prompt-btn" data-prompt="List the tech stack I work with.">Tech stack</button>
+            <button class="prompt-btn" data-prompt="How many years of experience do I have?">Years of experience</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Answer</h2>
+          <div id="answer" class="answer-box muted">Ask a question to see the grounded response.</div>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <h2 style="margin:0;">Sources</h2>
+          <small class="muted">Top CV chunks used for this answer</small>
+        </div>
+        <div id="sources" class="source-list">
+          <div class="muted">No sources yet.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function(){
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle');
+      const stored = localStorage.getItem('cv-theme');
+      if (stored) html.setAttribute('data-theme', stored);
+      themeToggle.textContent = html.getAttribute('data-theme') === 'light' ? '🌙' : '☀️';
+      themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        const next = current === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('cv-theme', next);
+        themeToggle.textContent = next === 'light' ? '🌙' : '☀️';
+      });
+
+      const question = document.getElementById('question');
+      const askBtn = document.getElementById('ask-btn');
+      const statusEl = document.getElementById('status');
+      const answerEl = document.getElementById('answer');
+      const sourcesEl = document.getElementById('sources');
+      const modePill = document.getElementById('mode-pill');
+
+      function setStatus(text, isError = false) {
+        statusEl.className = isError ? 'status error' : 'status';
+        statusEl.innerHTML = `<span class="dot"></span><span>${text}</span>`;
+      }
+
+      function truncate(text, max = 360) {
+        if (!text) return '';
+        if (text.length <= max) return text;
+        return text.slice(0, max) + '…';
+      }
+
+      function renderSources(chunks) {
+        sourcesEl.innerHTML = '';
+        if (!Array.isArray(chunks) || !chunks.length) {
+          sourcesEl.innerHTML = '<div class="muted">No sources returned.</div>';
+          return;
+        }
+        chunks.forEach((chunk, i) => {
+          const div = document.createElement('div');
+          div.className = 'source';
+          div.innerHTML = `
+            <div class="source-head">
+              <strong>Chunk ${i + 1}</strong>
+              <span class="pill">score ${chunk.score ?? '-'}</span>
+            </div>
+            <small class="muted">ID ${chunk.id}</small>
+            <p>${truncate(chunk.preview || '')}</p>
+          `;
+          sourcesEl.appendChild(div);
+        });
+      }
+
+      async function ask() {
+        const q = question.value.trim();
+        if (!q) {
+          setStatus('Type a question first', true);
+          return;
+        }
+        askBtn.disabled = true;
+        setStatus('Thinking with Groq…');
+        answerEl.textContent = 'Generating answer...';
+        answerEl.classList.remove('muted');
+        sourcesEl.innerHTML = '<div class="muted">Retrieving sources...</div>';
+
+        try {
+          const res = await fetch('/api/cv-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: q }),
+          });
+          const text = await res.text();
+          let data = null;
+          try { data = text ? JSON.parse(text) : null; } catch (_) {}
+
+          if (!res.ok) {
+            const msg = data?.error || `Request failed (${res.status})`;
+            setStatus(msg, true);
+            answerEl.textContent = 'No answer.';
+            answerEl.classList.add('muted');
+            return;
+          }
+
+          const answer = data?.answer || 'No answer returned.';
+          answerEl.textContent = answer;
+          renderSources(data?.chunks);
+          setStatus(`Answered with ${data?.model || 'Groq'}`);
+          modePill.textContent = data?.usedEmbeddings ? 'Vector search' : 'Lexical fallback';
+        } catch (err) {
+          setStatus(err?.message || String(err), true);
+          answerEl.textContent = 'No answer.';
+          answerEl.classList.add('muted');
+        } finally {
+          askBtn.disabled = false;
+        }
+      }
+
+      askBtn.addEventListener('click', ask);
+      question.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+          e.preventDefault();
+          ask();
+        }
+      });
+
+      document.querySelectorAll('.prompt-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          question.value = btn.getAttribute('data-prompt') || '';
+          question.focus();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
