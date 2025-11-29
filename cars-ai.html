@@ -2,41 +2,284 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cars AI SQL Tester</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cars AI Playground</title>
+  <style>
+    :root{
+      --bg:#f6f9ff;
+      --surface:#ffffff;
+      --accent:#0b66c2;
+      --text:#0f172a;
+      --muted:#5c6673;
+      --border:#e3eaf5;
+      --shadow:0 16px 40px rgba(15,23,42,0.12);
+      --radius:16px;
+    }
+    [data-theme="dark"]{
+      --bg:#0f172a;
+      --surface:#111827;
+      --accent:#3b82f6;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:#1f2937;
+      --shadow:0 16px 40px rgba(0,0,0,0.35);
+    }
+    *{box-sizing:border-box;}
+    body{margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text);}
+    a{text-decoration:none; color:inherit;}
+    .page{min-height:100vh; display:flex; flex-direction:column;}
+    .top-bar{position:sticky; top:0; z-index:10; backdrop-filter:blur(10px); background:rgba(255,255,255,0.8); border-bottom:1px solid var(--border); box-shadow:0 8px 20px rgba(15,23,42,0.08);}
+    [data-theme="dark"] .top-bar{background:rgba(17,24,39,0.85);}
+    .top-bar-inner{max-width:1100px; margin:0 auto; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{font-weight:800; letter-spacing:0.2px; font-size:18px;}
+    .toggle{border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:8px 12px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 10px 24px rgba(15,23,42,0.08);}
+    .toggle:hover{filter:brightness(1.02);}
+    main{flex:1; width:100%;}
+    .container{max-width:1100px; margin:0 auto; padding:22px 18px 44px; display:grid; gap:24px;}
+    .hero{background:var(--surface); border-radius:22px; box-shadow:var(--shadow); padding:26px; display:grid; gap:12px;}
+    .hero h1{margin:0; font-size:32px;}
+    .hero p{margin:0; color:var(--muted); line-height:1.6;}
+    .tags{display:flex; gap:8px; flex-wrap:wrap;}
+    .tag{background:rgba(11,102,194,0.1); color:var(--accent); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px;}
+    [data-theme="dark"] .tag{background:rgba(59,130,246,0.15);}
+    .cards{display:grid; grid-template-columns:2fr 1fr; gap:18px;}
+    .card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; display:grid; gap:14px; border:1px solid var(--border);}
+    .card h2{margin:0; font-size:20px;}
+    .card h3{margin:0; font-size:16px;}
+    .input-wrap{display:grid; gap:10px;}
+    textarea{width:100%; min-height:140px; border:1px solid var(--border); border-radius:14px; padding:12px; font-size:14px; font-family:inherit; background:var(--surface); color:var(--text); box-shadow:0 8px 20px rgba(15,23,42,0.05);}
+    .action-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+    .btn{border:none; cursor:pointer; padding:12px 16px; border-radius:12px; font-weight:800; transition:transform 0.15s ease, filter 0.15s ease;}
+    .btn-primary{background:var(--accent); color:#fff; box-shadow:0 12px 26px rgba(11,102,194,0.25);}
+    .btn-primary:hover{filter:brightness(0.95); transform:translateY(-1px);}
+    .btn-ghost{background:var(--surface); color:var(--text); border:1px solid var(--border);}
+    .btn-ghost:hover{filter:brightness(1.02);}
+    .status{font-size:13px; color:var(--muted);}
+    .examples{display:flex; flex-wrap:wrap; gap:8px;}
+    .example{background:rgba(11,102,194,0.08); color:var(--accent); border:none; padding:8px 10px; border-radius:10px; cursor:pointer; font-weight:700;}
+    .example:hover{filter:brightness(0.95);}
+    [data-theme="dark"] .example{background:rgba(59,130,246,0.16);}
+    .details-group details{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 14px 6px; box-shadow:var(--shadow); margin-top:10px;}
+    summary{cursor:pointer; font-weight:800; color:var(--text); outline:none;}
+    .results-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:18px;}
+    .badge{background:rgba(11,102,194,0.12); color:var(--accent); padding:4px 9px; border-radius:999px; font-weight:700; font-size:12px;}
+    [data-theme="dark"] .badge{background:rgba(59,130,246,0.16);}
+    .table-wrap{overflow:auto; border:1px solid var(--border); border-radius:12px;}
+    table{width:100%; border-collapse:collapse; font-size:14px;}
+    th,td{padding:10px 12px; border-bottom:1px solid var(--border); text-align:left;}
+    th{position:sticky; top:0; background:rgba(11,102,194,0.08); color:var(--text);}
+    tr:nth-child(even) td{background:rgba(15,23,42,0.02);}
+    tr:hover td{background:rgba(11,102,194,0.08);}
+    pre{margin:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:12px; white-space:pre-wrap; word-break:break-word;}
+    .code-header{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+    .footer{margin:30px 0 12px; text-align:center; color:var(--muted); font-size:13px;}
+    @media(max-width:900px){
+      .cards{grid-template-columns:1fr;}
+      .results-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:640px){
+      .hero h1{font-size:26px;}
+      textarea{min-height:120px;}
+    }
+  </style>
 </head>
-<body>
-  <h2>Test /api/query Endpoint</h2>
-  <label for="sql">SQL Query:</label><br>
-  <textarea id="sql" rows="8" cols="60" placeholder="Type your SQL query here..."></textarea><br><br>
-  <button id="runBtn">Run SQL</button>
-  <h3>Result:</h3>
-  <pre id="result"></pre>
+<body data-theme="light">
+  <div class="page">
+    <header class="top-bar">
+      <div class="top-bar-inner">
+        <div class="brand">Cars AI Playground</div>
+        <button class="toggle" id="theme-toggle" type="button" aria-label="Toggle theme">🌞 / 🌙</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <section class="hero">
+          <div class="tags">
+            <span class="tag">AI Agent</span>
+            <span class="tag">SQLite</span>
+            <span class="tag">Natural Language → SQL</span>
+          </div>
+          <h1>Query the cars database with natural language or raw SQL.</h1>
+          <p>Type SQL directly or ask a question to get valid, read-only queries. Review the generated SQL, copy it, and see structured results instantly.</p>
+        </section>
+
+        <section class="cards">
+          <div class="card" id="input-card">
+            <h2>Run SQL</h2>
+            <div class="input-wrap">
+              <label for="sql">SQL Query</label>
+              <textarea id="sql" placeholder="SELECT * FROM cars LIMIT 5;"></textarea>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary" id="runBtn">Run SQL</button>
+              <button class="btn btn-ghost" id="copy-sql" type="button">Copy SQL</button>
+              <span id="status" class="status"></span>
+            </div>
+            <div class="examples">
+              <button class="example" type="button" data-sql="SELECT brand, model, price_eur FROM cars WHERE price_eur < 10000 ORDER BY price_eur ASC LIMIT 5;">Top 5 cars under €10k</button>
+              <button class="example" type="button" data-sql="SELECT brand, model, mileage_km, transmission FROM cars WHERE transmission = 'Automatic' ORDER BY mileage_km ASC LIMIT 5;">Low mileage automatics</button>
+              <button class="example" type="button" data-sql="SELECT brand, model, year, fuel_type, price_eur FROM cars WHERE fuel_type = 'Diesel' ORDER BY year DESC LIMIT 5;">Recent diesel models</button>
+              <button class="example" type="button" data-sql="SELECT brand, model, price_eur, accident_history FROM cars WHERE accident_history = 'No' ORDER BY price_eur ASC LIMIT 5;">No accident history</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Sections</h2>
+            <div class="details-group">
+              <details open>
+                <summary>How it works</summary>
+                <p>Natural language (or raw SQL) → validated as read-only → executed against cars.db → rows rendered with sticky table headers.</p>
+              </details>
+              <details>
+                <summary>Example Prompts</summary>
+                <ul>
+                  <li>Show BMW cars under 80,000 km ordered by mileage.</li>
+                  <li>List the top 5 cheapest diesel cars.</li>
+                  <li>Find automatic SUVs sorted by mileage ascending.</li>
+                  <li>Cars with no accident history and price under 10,000.</li>
+                </ul>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <section class="results-grid">
+          <div class="card">
+            <div class="code-header">
+              <h2>Generated SQL</h2>
+              <button class="btn btn-ghost" id="copy-generated" type="button">Copy SQL</button>
+            </div>
+            <pre id="sql-output">(waiting)</pre>
+          </div>
+
+          <div class="card">
+            <div class="code-header">
+              <h2>Query Results</h2>
+              <span class="badge" id="row-count">0 rows</span>
+            </div>
+            <div id="table-container" class="table-wrap" style="display:none"></div>
+            <pre id="result">Awaiting query.</pre>
+          </div>
+        </section>
+
+        <footer class="footer">
+          Built for Cars AI Demo — run safe, read-only SQL against cars.db.
+        </footer>
+      </div>
+    </main>
+  </div>
 
   <script>
-    document.getElementById('runBtn').onclick = async function() {
-      const sql = document.getElementById('sql').value;
+    (function(){
+      const sqlInput = document.getElementById('sql');
+      const runBtn = document.getElementById('runBtn');
       const resultEl = document.getElementById('result');
-      resultEl.textContent = 'Running...';
-      try {
-        const response = await fetch('/api/query', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ sql })
-        });
-        const data = await response.json();
-        if (response.status === 200) {
-          resultEl.textContent = JSON.stringify(data, null, 2);
-        } else if (response.status === 400 || response.status === 500) {
-          resultEl.textContent = data.error || 'Unknown error';
-        } else {
-          resultEl.textContent = 'Unexpected response status: ' + response.status;
-        }
-      } catch (err) {
-        resultEl.textContent = 'Network or parsing error: ' + err;
+      const statusEl = document.getElementById('status');
+      const rowCount = document.getElementById('row-count');
+      const tableContainer = document.getElementById('table-container');
+      const sqlOutput = document.getElementById('sql-output');
+      const copySqlBtn = document.getElementById('copy-sql');
+      const copyGeneratedBtn = document.getElementById('copy-generated');
+      const themeToggle = document.getElementById('theme-toggle');
+      const examples = document.querySelectorAll('.example');
+
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme) document.body.setAttribute('data-theme', storedTheme);
+
+      function setStatus(text){
+        statusEl.textContent = text || '';
       }
-    };
+
+      function copyText(text){
+        if (!text) return;
+        navigator.clipboard.writeText(text).catch(()=>{});
+      }
+
+      function renderTable(data){
+        tableContainer.innerHTML = '';
+        tableContainer.style.display = 'none';
+        if (!Array.isArray(data) || data.length === 0){
+          rowCount.textContent = '0 rows';
+          return;
+        }
+        const keys = Object.keys(data[0] || {});
+        rowCount.textContent = data.length === 1 ? '1 row' : data.length + ' rows';
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const hr = document.createElement('tr');
+        keys.forEach(k=>{
+          const th = document.createElement('th');
+          th.textContent = k;
+          hr.appendChild(th);
+        });
+        thead.appendChild(hr);
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        data.forEach(row=>{
+          const tr = document.createElement('tr');
+          keys.forEach(k=>{
+            const td = document.createElement('td');
+            const val = row && Object.prototype.hasOwnProperty.call(row,k) ? row[k] : '';
+            td.textContent = val === null || typeof val === 'undefined' ? '' : val;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        tableContainer.appendChild(table);
+        tableContainer.style.display = 'block';
+      }
+
+      examples.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const v = btn.getAttribute('data-sql') || '';
+          sqlInput.value = v;
+        });
+      });
+
+      copySqlBtn.addEventListener('click', ()=> copyText(sqlInput.value));
+      copyGeneratedBtn.addEventListener('click', ()=> copyText(sqlOutput.textContent));
+
+      themeToggle.addEventListener('click', ()=>{
+        const current = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', current);
+        localStorage.setItem('theme', current);
+      });
+
+      runBtn.onclick = async function() {
+        const sql = sqlInput.value;
+        resultEl.textContent = 'Running...';
+        sqlOutput.textContent = sql || '(none)';
+        tableContainer.style.display = 'none';
+        rowCount.textContent = '0 rows';
+        setStatus('Sending request...');
+        try {
+          const response = await fetch('/api/query', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sql })
+          });
+          const data = await response.json();
+          if (response.status === 200) {
+            resultEl.textContent = JSON.stringify(data, null, 2);
+            renderTable(data);
+            setStatus('Success');
+          } else if (response.status === 400 || response.status === 500) {
+            resultEl.textContent = data.error || 'Unknown error';
+            setStatus('Error');
+          } else {
+            resultEl.textContent = 'Unexpected response status: ' + response.status;
+            setStatus('Unexpected response');
+          }
+        } catch (err) {
+          resultEl.textContent = 'Network or parsing error: ' + err;
+          setStatus('Network error');
+        }
+      };
+    })();
   </script>
 </body>
 </html>

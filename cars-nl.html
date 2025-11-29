@@ -1,120 +1,891 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cars NL Query</title>
+  <title>Cars AI Playground</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(135deg,#f7fbff,#f3f1ff 30%,#eaf5ff); color:#222; margin:0; padding:24px}
-    .container{max-width:var(--max-width); margin:0 auto; background:var(--card); border-radius:18px; box-shadow:0 16px 50px rgba(15,23,42,0.12); padding:30px}
-    .header{display:flex; justify-content:space-between; gap:20px; align-items:center; border-bottom:1px solid #e6eef6; padding-bottom:12px}
-    .name{margin:0; font-size:30px; letter-spacing:0.4px; color:#0b2f5f}
-    .title{margin:2px 0 0; color:var(--muted); font-size:15px}
-    .controls{display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap}
-    textarea{width:100%; min-height:130px; padding:12px; font-size:15px; border:1px solid #d7e1eb; border-radius:12px; resize:vertical; font-family:inherit; box-shadow:0 8px 20px rgba(15,23,42,0.06)}
-    button{background:var(--accent); color:white; border:none; padding:12px 16px; border-radius:12px; font-weight:700; cursor:pointer}
-    button:hover{filter:brightness(0.96)}
-    button:disabled{opacity:0.6; cursor:not-allowed}
-    .status{margin:10px 0 0; color:#333}
-    .error{color:#b00020}
-    .muted{color:var(--muted)}
-    .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0}
-    .how-btn{background:linear-gradient(135deg,#0b66c2,#1f8fff); color:white; border:1px solid #d7e1eb; padding:14px 22px; border-radius:999px; font-weight:800; cursor:pointer; box-shadow:0 14px 24px rgba(15,23,42,0.18); font-size:16px; letter-spacing:0.2px; position:relative; overflow:hidden; transition:transform 0.2s ease, filter 0.2s ease}
-    .how-btn::after{content:''; position:absolute; inset:0; border-radius:999px; background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 60%); opacity:0; transition:opacity 0.25s ease}
-    .how-btn:hover{filter:brightness(1.05); transform:translateY(-2px) scale(1.01)}
-    .how-btn:hover::after{opacity:1}
-    .how-btn:active{transform:translateY(0) scale(0.99)}
-    @keyframes pulseGlow{0%{box-shadow:0 0 0 0 rgba(31,143,255,0.45)}70%{box-shadow:0 0 0 16px rgba(31,143,255,0)}100%{box-shadow:0 0 0 0 rgba(31,143,255,0)}}
-    @keyframes popIn{0%{transform:scale(0.9); opacity:0;}60%{transform:scale(1.05); opacity:1;}100%{transform:scale(1); opacity:1;}}
-    .how-btn.attention{animation:pulseGlow 1.8s ease-in-out infinite, popIn 0.45s ease-out 1}
-    .modal-overlay{position:fixed; inset:0; background:rgba(19,33,68,0.4); display:none; align-items:center; justify-content:center; padding:16px; z-index:1000; opacity:0; transition:opacity 0.2s ease}
-    .modal-overlay.show{display:flex; opacity:1}
-    .modal-card{background:white; max-width:720px; width:100%; border-radius:14px; box-shadow:0 18px 38px rgba(15,23,42,0.18); padding:22px; position:relative; max-height:90vh; overflow:auto}
-    .modal-card h3{margin:0 0 10px; color:var(--accent)}
-    .modal-card p{margin:0 0 12px; line-height:1.6}
-    .modal-card .bullets{margin:8px 0 16px; padding-left:18px}
-    .modal-card .bullets li{margin:6px 0; line-height:1.5}
-    .modal-close{position:absolute; top:10px; right:10px; border:none; background:transparent; font-size:18px; cursor:pointer; color:#555}
-    .modal-close:hover{color:#111}
-    @media (max-width:520px){
-      .modal-card{padding:16px}
-      .how-btn{width:100%}
+    :root {
+      --bg-light: #f8fafc;
+      --bg-dark: #0f1419;
+      --surface-light: #ffffff;
+      --surface-dark: #1a1f2e;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text-light: #1e293b;
+      --text-dark: #e2e8f0;
+      --muted-light: #64748b;
+      --muted-dark: #94a3b8;
+      --border-light: #e2e8f0;
+      --border-dark: #334155;
     }
-    .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-top:18px}
-    .card{background:#f7f9fb; border:1px solid #e6eef6; border-radius:14px; padding:14px; display:none; box-shadow:0 10px 24px rgba(15,23,42,0.08)}
-    .card h3{margin:0 0 8px; font-size:15px; color:#0b66c2}
-    .card-top{display:flex; justify-content:space-between; align-items:center; gap:10px}
-    .pill{background:var(--accent); color:white; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700}
-    .rows-content{background:white; border:1px solid #d7e1eb; border-radius:8px; padding:10px; min-height:80px}
-    .rows-content.muted{color:var(--muted)}
-    .table-wrap{overflow:auto}
-    .data-table{width:100%; border-collapse:collapse; font-size:14px}
-    .data-table th, .data-table td{padding:8px 10px; border:1px solid #e6eef6; text-align:left}
-    .data-table th{background:#f1f6fb; position:sticky; top:0; z-index:1}
-    pre{margin:0; background:white; border:1px solid #d7e1eb; border-radius:8px; padding:10px; white-space:pre-wrap; word-break:break-word; font-size:14px}
-    @media (max-width:720px){
-      body{padding:12px}
-      .container{padding:22px}
-      .header{flex-direction:column; align-items:flex-start}
-      .controls{flex-direction:column; align-items:flex-start}
-      .cards{grid-template-columns:1fr}
-      .how-btn{width:100%; text-align:center}
+
+    html[data-theme="light"] {
+      --bg: var(--bg-light);
+      --surface: var(--surface-light);
+      --text: var(--text-light);
+      --muted: var(--muted-light);
+      --border: var(--border-light);
+    }
+
+    html[data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --surface: var(--surface-dark);
+      --text: var(--text-dark);
+      --muted: var(--muted-dark);
+      --border: var(--border-dark);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      gap: 20px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-grow: 1;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .theme-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+
+    /* Main container */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Hero section */
+    .hero {
+      margin-bottom: 60px;
+      text-align: center;
+    }
+
+    .hero-headline {
+      margin: 0 0 12px 0;
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text) 0%, var(--muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      margin: 0 0 24px 0;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-tags {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+
+    .tag {
+      background: linear-gradient(135deg, var(--accent), #60a5fa);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tag:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Query card */
+    .query-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .query-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .query-card h2 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+    }
+
+    .query-description {
+      color: var(--muted);
+      margin: 0 0 20px 0;
+      font-size: 15px;
+    }
+
+    #ask-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 16px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      resize: vertical;
+      transition: all 0.2s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea::placeholder {
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #60a5fa);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status {
+      flex: 1;
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status.error {
+      color: #ef4444;
+    }
+
+    .status.success {
+      color: #10b981;
+    }
+
+    .status-icon {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Results section */
+    .results-section {
+      margin-bottom: 40px;
+    }
+
+    .results-section h3 {
+      font-size: 18px;
+      margin: 0 0 12px 0;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .card h3 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      background: linear-gradient(135deg, var(--accent), #60a5fa);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .code-copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .code-copy-btn:hover {
+      background: var(--border);
+    }
+
+    pre {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text);
+      padding-right: 60px;
+    }
+
+    .rows-content {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 100px;
+      overflow-x: auto;
+    }
+
+    .rows-content.muted {
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-style: italic;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: var(--border);
+      color: var(--text);
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .data-table td {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .data-table tbody tr:nth-child(odd) {
+      background: var(--bg);
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--border);
+    }
+
+    /* Expandable sections */
+    .expandable-section {
+      margin-bottom: 40px;
+    }
+
+    .expandable-trigger {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .expandable-trigger:hover {
+      background: var(--border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .expandable-trigger.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .toggle-icon {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .expandable-trigger.active .toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .expandable-content {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .expandable-content.active {
+      display: block;
+    }
+
+    .expandable-content h4 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .expandable-content p {
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .expandable-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .expandable-content ul {
+      margin: 0 0 16px 0;
+      padding-left: 20px;
+    }
+
+    .expandable-content li {
+      margin: 8px 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .example-prompts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .prompt-btn {
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text);
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .prompt-btn:hover {
+      border-color: var(--accent);
+      background: var(--border);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      max-width: 700px;
+      width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      margin: 0 0 14px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-card p {
+      margin: 0 0 14px 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .modal-card ul {
+      margin: 0 0 16px 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .modal-card li {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--border);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Utility classes */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* Loading animation */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 20px 16px;
+      }
+
+      .header-content {
+        padding: 14px 16px;
+      }
+
+      .hero-headline {
+        font-size: 32px;
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+      }
+
+      .query-card {
+        padding: 20px;
+      }
+
+      textarea {
+        min-height: 120px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .status {
+        flex: none;
+      }
+
+      .modal-card {
+        padding: 20px;
+      }
+
+      .data-table {
+        font-size: 13px;
+      }
+
+      .data-table th, .data-table td {
+        padding: 10px 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-title {
+        font-size: 20px;
+      }
+
+      .hero-headline {
+        font-size: 24px;
+      }
+
+      .hero-subtitle {
+        font-size: 14px;
+      }
+
+      .hero-tags {
+        gap: 8px;
+      }
+
+      .tag {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .query-description {
+        font-size: 14px;
+      }
+
+      textarea {
+        min-height: 100px;
+        font-size: 16px; /* Prevent zoom on iOS */
+      }
+
+      .expandable-trigger {
+        font-size: 14px;
+        padding: 14px 16px;
+      }
+
+      .example-prompts {
+        grid-template-columns: 1fr;
+      }
+
+      .prompt-btn {
+        font-size: 12px;
+        padding: 10px 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="container">
-    <header class="header">
-      <div>
-        <h1 class="name">Cars NL Query</h1>
-        <p class="title">Ask natural-language questions; see SQL + results.</p>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="header-brand">
+        <h1 class="header-title">Cars AI</h1>
       </div>
-      <button id="how-btn" class="how-btn attention" type="button">How This Works</button>
-    </header>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle dark mode">🌙</button>
+    </div>
+  </header>
 
-    <section class="section">
-      <h2>Ask the database</h2>
-      <p>Type a question about the <code>cars</code> table (brand, model, year, mileage_km, price_eur, accident_history, fuel_type, transmission).</p>
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h2 class="hero-headline">Cars AI Playground</h2>
+      <p class="hero-subtitle">Ask questions about cars in natural language, and let AI turn them into SQL queries. See results instantly.</p>
+      <div class="hero-tags">
+        <span class="tag">🤖 AI Agent</span>
+        <span class="tag">💾 SQLite</span>
+        <span class="tag">🚀 Instant Results</span>
+      </div>
+    </section>
+
+    <!-- Query Card -->
+    <section class="query-card">
+      <h2>Ask the Database</h2>
+      <p class="query-description">Type a question about the cars table in natural language. The AI will translate it to SQL, validate it for safety, and fetch results from the database.</p>
+      
       <form id="ask-form">
-        <label for="question" class="sr-only">Question</label>
-        <textarea id="question" name="question" placeholder="Example: Show the top 5 cheapest diesel cars with automatic transmission."></textarea>
+        <label for="question" class="sr-only">Your question</label>
+        <textarea 
+          id="question" 
+          name="question" 
+          placeholder="Example: Show me BMW cars under 80,000 km with automatic transmission and price under 25,000 EUR"
+          required
+        ></textarea>
+        
         <div class="controls">
-          <button type="submit" id="ask-btn">Ask DB</button>
-          <div id="status" class="status" aria-live="polite">Waiting for your question.</div>
+          <button type="submit" id="ask-btn" class="btn btn-primary">
+            <span>Ask AI</span>
+          </button>
+          <div id="status" class="status" aria-live="polite">
+            <span class="status-icon"></span>
+            Ready for your question
+          </div>
         </div>
       </form>
+    </section>
 
-      <div class="cards">
-        <div class="card" id="sql-card">
-          <h3>Generated SQL</h3>
+    <!-- Results Section -->
+    <section class="results-section">
+      <div class="card" id="sql-card">
+        <h3>Generated SQL</h3>
+        <div class="code-block">
+          <button type="button" class="code-copy-btn" id="copy-sql">Copy</button>
           <pre id="sql-output">(waiting)</pre>
         </div>
-        <div class="card" id="rows-card">
-          <div class="card-top">
-            <h3>Results</h3>
-            <span id="row-count" class="pill">0 rows</span>
-          </div>
-          <div id="rows-output" class="rows-content muted">Awaiting query.</div>
+      </div>
+
+      <div class="card" id="rows-card">
+        <div class="card-header">
+          <h3>Query Results</h3>
+          <span id="row-count" class="pill">— rows</span>
+        </div>
+        <div id="rows-output" class="rows-content muted">Awaiting query.</div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="expandable-section">
+      <button type="button" class="expandable-trigger" id="how-it-works-trigger">
+        <span>📋 How It Works</span>
+        <span class="toggle-icon">▼</span>
+      </button>
+      <div class="expandable-content" id="how-it-works-content">
+        <h4>The AI → SQL → DB Pipeline</h4>
+        <p>This demo showcases a complete serverless workflow:</p>
+        <ul>
+          <li><strong>Natural Language Understanding:</strong> A Groq LLM interprets your plain-English question.</li>
+          <li><strong>SQL Generation:</strong> The AI generates SQL based on your intent.</li>
+          <li><strong>Safety Validation:</strong> A custom layer ensures only read-only (SELECT/WITH) queries execute.</li>
+          <li><strong>Database Query:</strong> The validated SQL runs against the cars SQLite database.</li>
+          <li><strong>Dynamic Results:</strong> Results are rendered as a clean, interactive HTML table.</li>
+        </ul>
+        <p><strong>Example questions you can ask:</strong></p>
+        <ul>
+          <li>"Show all BMW cars newer than 2018 under 80,000 km."</li>
+          <li>"List the top 5 cheapest diesel cars."</li>
+          <li>"Show automatic SUVs sorted by mileage ascending."</li>
+          <li>"Show cars with no accident history and price under 10,000."</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Example Prompts Section -->
+    <section class="expandable-section">
+      <button type="button" class="expandable-trigger" id="examples-trigger">
+        <span>✨ Example Prompts</span>
+        <span class="toggle-icon">▼</span>
+      </button>
+      <div class="expandable-content" id="examples-content">
+        <p>Click any example below to populate the query field:</p>
+        <div class="example-prompts">
+          <button type="button" class="prompt-btn" data-prompt="Show me all BMW cars with price under 30,000 EUR">
+            BMW cars under 30k EUR
+          </button>
+          <button type="button" class="prompt-btn" data-prompt="Show the top 5 cheapest diesel cars with automatic transmission">
+            Top 5 cheapest diesel automatics
+          </button>
+          <button type="button" class="prompt-btn" data-prompt="Show cars with no accident history sorted by price ascending">
+            No accident history, cheapest first
+          </button>
+          <button type="button" class="prompt-btn" data-prompt="Show all electric cars with less than 50,000 km">
+            Electric cars under 50k km
+          </button>
+          <button type="button" class="prompt-btn" data-prompt="Show luxury cars from 2020 onwards with automatic transmission">
+            Luxury automatics from 2020+
+          </button>
+          <button type="button" class="prompt-btn" data-prompt="Show cars with accident history by brand">
+            Cars with accident history
+          </button>
         </div>
       </div>
     </section>
-  </main>
+  </div>
 
+  <!-- Modal (How This Works) -->
   <div id="modal-overlay" class="modal-overlay" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <button class="modal-close" type="button" aria-label="Close modal">&times;</button>
       <h3 id="modal-title">What is this?</h3>
-      <p>This is an AI-powered Car Search Assistant.<br>
-      Instead of writing SQL or filtering manually, you can simply type what you want in natural language:</p>
-      <p>Example prompts you can try:</p>
-      <ul class="bullets">
-        <li>“Show all BMW cars newer than 2018 under 80,000 km.”</li>
-        <li>“List the top 5 cheapest diesel cars.”</li>
-        <li>“Show automatic SUVs sorted by mileage ascending.”</li>
-        <li>“Show cars with no accident history and price under 10,000.”</li>
-      </ul>
-      <p>The assistant understands your intent, turns it into SQL, validates it for safety, and returns clean, structured data from the cars database.</p>
+      <p>This is an AI-powered Car Search Assistant. Instead of writing SQL or filtering manually, you can simply type what you want in natural language.</p>
+      
       <h3>How This Works (Technical Overview)</h3>
       <p>This demo shows a complete AI → SQL → DB pipeline running fully serverless:</p>
       <ul class="bullets">
@@ -124,15 +895,67 @@
         <li>A serverless SQLite engine executes the query on the cars database.</li>
         <li>Results are rendered as a dynamic, responsive HTML table.</li>
       </ul>
-      <p>The app demonstrates modern agentic AI patterns:<br>
-      natural-language reasoning, safe tool-calling, database interaction, and serverless execution — all deployed on Vercel.</p>
+      <p>The app demonstrates modern agentic AI patterns: natural-language reasoning, safe tool-calling, database interaction, and serverless execution — all deployed on Vercel.</p>
     </div>
   </div>
 
   <script>
     (function(){
-      const form = document.getElementById('ask-form');
+      // Theme toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      
+      // Load theme preference from localStorage
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      html.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+      
+      function updateThemeIcon(theme) {
+        themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+      
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+      });
+
+      // Expandable sections
+      const howItWorksTrigger = document.getElementById('how-it-works-trigger');
+      const howItWorksContent = document.getElementById('how-it-works-content');
+      const examplesTrigger = document.getElementById('examples-trigger');
+      const examplesContent = document.getElementById('examples-content');
+
+      function toggleSection(trigger, content) {
+        trigger.classList.toggle('active');
+        content.classList.toggle('active');
+      }
+
+      howItWorksTrigger.addEventListener('click', () => {
+        toggleSection(howItWorksTrigger, howItWorksContent);
+      });
+
+      examplesTrigger.addEventListener('click', () => {
+        toggleSection(examplesTrigger, examplesContent);
+      });
+
+      // Example prompts
+      const promptButtons = document.querySelectorAll('.prompt-btn');
       const questionField = document.getElementById('question');
+
+      promptButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const prompt = btn.getAttribute('data-prompt');
+          questionField.value = prompt;
+          questionField.focus();
+        });
+      });
+
+      // Form and UI elements
+      const form = document.getElementById('ask-form');
       const statusEl = document.getElementById('status');
       const sqlCard = document.getElementById('sql-card');
       const rowsCard = document.getElementById('rows-card');
@@ -140,16 +963,16 @@
       const rowsOutput = document.getElementById('rows-output');
       const rowCount = document.getElementById('row-count');
       const askBtn = document.getElementById('ask-btn');
-      const howBtn = document.getElementById('how-btn');
+      const copySqlBtn = document.getElementById('copy-sql');
       const modalOverlay = document.getElementById('modal-overlay');
       const modalClose = modalOverlay.querySelector('.modal-close');
 
-      function setStatus(text, isError){
-        statusEl.textContent = text;
+      function setStatus(text, isError = false) {
+        statusEl.innerHTML = `<span class="status-icon"></span>${text}`;
         statusEl.className = isError ? 'status error' : 'status';
       }
 
-      function renderRows(rows){
+      function renderRows(rows) {
         let count = 0;
         rowsOutput.innerHTML = '';
         rowsOutput.className = 'rows-content';
@@ -241,26 +1064,30 @@
         rowsOutput.classList.add('muted');
       }
 
-      function openModal(){
-        modalOverlay.classList.add('show');
-        modalOverlay.setAttribute('aria-hidden', 'false');
-        howBtn.classList.remove('attention');
-      }
-
-      function closeModal(){
+      function closeModal() {
         modalOverlay.classList.remove('show');
         modalOverlay.setAttribute('aria-hidden', 'true');
       }
 
-      howBtn.addEventListener('click', openModal);
       modalClose.addEventListener('click', closeModal);
       modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) closeModal();
       });
 
-      // Trigger initial attention animation on load
-      window.addEventListener('load', () => {
-        howBtn.classList.add('attention');
+      // Copy SQL button
+      copySqlBtn.addEventListener('click', async () => {
+        const sql = sqlOutput.textContent;
+        if (sql && sql !== '(waiting)') {
+          try {
+            await navigator.clipboard.writeText(sql);
+            copySqlBtn.textContent = 'Copied!';
+            setTimeout(() => {
+              copySqlBtn.textContent = 'Copy';
+            }, 2000);
+          } catch (err) {
+            console.error('Failed to copy:', err);
+          }
+        }
       });
 
       form.addEventListener('submit', async (event) => {
@@ -272,14 +1099,14 @@
         }
 
         askBtn.disabled = true;
-        setStatus('Sending to /api/nl-query...');
+        setStatus('Running query...');
         sqlCard.style.display = 'none';
         rowsCard.style.display = 'none';
         sqlOutput.textContent = '';
         rowCount.textContent = '—';
         rowsOutput.innerHTML = '';
         rowsOutput.className = 'rows-content muted';
-        rowsOutput.textContent = 'Waiting...';
+        rowsOutput.textContent = 'Processing...';
 
         try {
           const response = await fetch('/api/nl-query', {
@@ -313,7 +1140,7 @@
           renderRows(rows);
           sqlCard.style.display = 'block';
           rowsCard.style.display = 'block';
-          setStatus('Query succeeded.');
+          setStatus('✓ Query succeeded');
         } catch (err) {
           setStatus('Error: ' + (err && err.message ? err.message : String(err)), true);
         } finally {

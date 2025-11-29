@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.23.0",
+    "better-sqlite3": "^12.5.0",
     "express": "^5.1.0",
-    "sql.js": "^1.8.0"
+    "sql.js": "^1.8.0",
+    "zod": "^4.1.13"
   }
 }

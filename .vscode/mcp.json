@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "my-mcp-server-cars": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["mcp-server.js"],
+      "cwd": "/Users/zeyadelhodaiby/Downloads/zeyad-personal"
+    }
+  },
+  "inputs": []
+}
