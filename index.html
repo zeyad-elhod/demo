@@ -7,184 +7,244 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     :root{
+      --bg:linear-gradient(180deg,#f6f9ff 0%,#eef3ff 40%,#f8fbff 100%);
       --surface:#ffffff;
-      --shell:linear-gradient(180deg,#f5f8ff 0%, #f3f6ff 100%);
       --accent:#0b66c2;
-      --muted:#55616a;
-      --shadow:0 14px 40px rgba(11,102,194,0.08);
-      --card-shadow: 0 10px 30px rgba(15,23,42,0.08);
+      --muted:#5a6470;
+      --shadow:0 16px 40px rgba(15,23,42,0.12);
+      --card-shadow:0 10px 26px rgba(15,23,42,0.08);
+      --radius:16px;
     }
-    body{margin:0; background:var(--shell); color:#0b2f5f; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
-    a{text-decoration:none;}
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:#0f172a;}
+    a{text-decoration:none; color:inherit;}
     .page-shell{min-height:100vh; display:flex; flex-direction:column;}
-    .top-nav{position:sticky; top:0; z-index:10; background:var(--surface); box-shadow:0 4px 12px rgba(15,23,42,0.08);}
-    .nav-inner{max-width:1100px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
-    .logo{font-weight:800; color:#0f172a; letter-spacing:0.3px; font-size:18px;}
-    .nav-action{background:var(--accent); color:white; padding:10px 14px; border-radius:10px; font-weight:700; box-shadow:0 10px 24px rgba(11,102,194,0.25);}
-    .nav-action:hover{filter:brightness(0.95);}
-    .hero{max-width:1100px; margin:22px auto 0; padding:18px;}
-    .hero-card{background:linear-gradient(135deg, rgba(11,102,194,0.06), rgba(31,143,255,0.03)); border-radius:16px; box-shadow:var(--card-shadow); padding:26px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
-    .hero h1{margin:0 0 6px; font-size:26px; color:var(--accent);}
-    .hero p{margin:0; color:var(--muted); line-height:1.6; max-width:760px}
-    .hero-cta{display:flex; gap:12px; align-items:center}
-    .primary-btn{background:var(--accent); color:white; padding:12px 16px; border-radius:12px; font-weight:700; box-shadow:0 12px 24px rgba(11,102,194,0.14);}
-    .primary-btn:hover{filter:brightness(0.96); transform:translateY(-1px)}
+    header.top-nav{position:sticky; top:0; z-index:20; backdrop-filter:blur(10px); background:rgba(255,255,255,0.9); box-shadow:0 6px 18px rgba(15,23,42,0.08);}
+    .nav-inner{max-width:1180px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .nav-left{display:flex; align-items:center; gap:10px;}
+    .logo{font-weight:800; font-size:18px; letter-spacing:0.2px; color:#0b2f5f;}
+    .nav-links{display:flex; align-items:center; gap:10px;}
+    .nav-link, .nav-btn{padding:10px 14px; border-radius:12px; font-weight:700; border:1px solid transparent;}
+    .nav-link{color:#0b2f5f; border-color:transparent;}
+    .nav-link:hover{background:rgba(11,102,194,0.08);}
+    .nav-btn{background:var(--accent); color:white; box-shadow:0 10px 20px rgba(11,102,194,0.2);}
+    .nav-btn:hover{filter:brightness(0.96);}
     main{flex:1; width:100%;}
-    .content-wrap{max-width:1100px; margin:0 auto; padding:0 18px 32px;}
-    .card{background:var(--surface); border-radius:14px; box-shadow:var(--card-shadow); padding:22px; margin-top:18px;}
-    footer{margin-top:30px; padding:18px; text-align:center; color:var(--muted);}
-    @media (max-width:720px){
-      .nav-inner{padding:12px 14px;}
-      .hero-card{padding:18px;}
-      .card{padding:18px;}
+    .container-wide{max-width:1180px; margin:0 auto; padding:0 18px;}
+    .hero{padding:36px 0 10px;}
+    .hero-card{background:var(--surface); border-radius:22px; box-shadow:var(--shadow); padding:26px 26px 28px; display:grid; gap:14px;}
+    .hero h1{margin:0; font-size:32px; color:#0b2f5f;}
+    .hero p{margin:0; color:var(--muted); line-height:1.6; max-width:860px;}
+    .hero-actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+    .primary-btn{background:var(--accent); color:white; padding:13px 18px; border-radius:14px; font-weight:800; box-shadow:0 14px 26px rgba(11,102,194,0.22);}
+    .primary-btn:hover{filter:brightness(0.95); transform:translateY(-1px);}
+    .section{margin-top:42px;}
+    .section-header{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom:14px;}
+    .section h2{margin:0; font-size:22px; color:#0b2f5f;}
+    .projects-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px;}
+    .project-card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:18px; display:flex; flex-direction:column; gap:10px;}
+    .project-card h3{margin:0; color:#0b2f5f;}
+    .project-card p{margin:0; color:var(--muted); line-height:1.5;}
+    .project-actions{margin-top:auto; display:flex; gap:10px;}
+    .ghost-btn{padding:10px 14px; border-radius:12px; border:1px solid #d6e2f2; font-weight:700; color:#0b2f5f; background:white;}
+    .ghost-btn:hover{background:rgba(11,102,194,0.07);}
+    .content-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:18px;}
+    .card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:20px;}
+    .card h2, .card h3{margin-top:0; color:#0b2f5f;}
+    .contact p{margin:4px 0;}
+    .skills-list, .education ul, .certificates ul, .languages ul{padding-left:18px; margin:8px 0;}
+    .skills-list li, .education li, .certificates li, .languages li{margin:4px 0; line-height:1.4;}
+    footer.footer{margin:48px 0 24px; text-align:center; color:var(--muted);}
+    @media (max-width:900px){
+      .content-grid{grid-template-columns:1fr; }
+    }
+    @media (max-width:700px){
       .nav-inner{flex-direction:column; align-items:flex-start;}
-      .nav-action{width:100%; text-align:center;}
-      .hero h1{font-size:24px;}
+      .nav-links{width:100%; flex-wrap:wrap;}
+      .nav-btn{width:100%; text-align:center;}
+      .hero h1{font-size:28px;}
+      .hero-card{padding:20px;}
+      .projects-grid{grid-template-columns:1fr;}
     }
   </style>
 </head>
 <body>
   <div class="page-shell">
+    <header class="top-nav">
+      <div class="nav-inner">
+        <div class="nav-left">
+          <div class="logo">AI Projects</div>
+        </div>
+        <div class="nav-links">
+          <a class="nav-link" href="#projects">AI Projects</a>
+          <a class="nav-link" href="#cv-section">CV / About Me</a>
+          <a class="nav-btn" href="./cars-nl.html">Car SQL Agent</a>
+        </div>
+      </div>
+    </header>
+
     <main>
-      <div class="content-wrap">
-        <main class="container">
-          <!-- Single project entry kept: Car SQL Agent (moved to top) -->
-          <section class="section projects card">
-            <h2>Car SQL Agent</h2>
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
-              <div>
-                <p style="margin:0 0 6px; color:var(--muted)">Interactive, AI-driven SQL queries against the cars dataset.</p>
+      <div class="container-wide">
+        <section class="hero">
+          <div class="hero-card">
+            <h1>Welcome to My AI Playground</h1>
+            <p>Explore AI-driven, automation-focused projects and my professional profile. Dive into the Car SQL Agent to query data with natural language, and learn more about my background below.</p>
+            <div class="hero-actions">
+              <a class="primary-btn" href="./cars-nl.html">Open Car SQL Agent</a>
+              <a class="ghost-btn" href="#cv-section">View CV</a>
+            </div>
+          </div>
+        </section>
+
+        <section id="projects" class="section">
+          <div class="section-header">
+            <h2>AI Projects</h2>
+          </div>
+          <div class="projects-grid">
+            <div class="project-card">
+              <h3>Car SQL Agent</h3>
+              <p>AI-driven natural language to SQL over a cars database, with safe execution and clean results.</p>
+              <div class="project-actions">
+                <a class="ghost-btn" href="./cars-nl.html">Open Project</a>
               </div>
-              <div>
-                <a class="primary-btn" href="./cars-nl.html">Open Project</a>
-              </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <header class="header">
-            <div>
-              <h1 class="name">Zeyad Elhodaiby</h1>
-              <p class="title">SW Automation & Performance Lead</p>
+        <section id="cv-section" class="section" style="margin-top:56px;">
+          <div class="section-header">
+            <h2>About Me &amp; CV</h2>
+          </div>
+          <div class="content-grid">
+            <div class="card">
+              <header class="header">
+                <div>
+                  <h1 class="name">Zeyad Elhodaiby</h1>
+                  <p class="title">SW Automation &amp; Performance Lead</p>
+                </div>
+                <div class="contact">
+                  <p><strong>Address:</strong> Landsberg, Germany</p>
+                  <p><strong>Email:</strong> <a href="mailto:Zeyadelhodaiby@gmail.com">Zeyadelhodaiby@gmail.com</a></p>
+                  <p><strong>Mobile:</strong> <a href="tel:+491748665309">+49 174 8665309</a></p>
+                </div>
+              </header>
+
+              <section class="section summary">
+                <h2>Personal Summary</h2>
+                <p>With more than a decade of experience in software engineering, I lead automation and performance
+                initiatives across multiple domains. I focus on designing and building scalable automation
+                frameworks—not only for testing but for broader engineering workflows—while driving performance
+                optimization and system reliability. I also design and maintain CI/CD pipelines to streamline delivery
+                and ensure consistent, high-quality releases. Using technologies such as Selenium, Gatling, Java,
+                and TestNG, I help teams accelerate delivery, strengthen quality, and build maintainable,
+                high-impact automation solutions.</p>
+              </section>
+
+              <section class="section experience">
+                <h2>Experience</h2>
+
+                <article class="job">
+                  <h3>SW Automation and Performance Lead — Hilti, Germany</h3>
+                  <p class="date">April 2024 — Present</p>
+                  <ul>
+                    <li>Design and develop scalable software components and automation frameworks using Java and modern tooling.</li>
+                    <li>Implement performance-oriented solutions with Gatling and related technologies to ensure system efficiency and stability.</li>
+                    <li>Build and maintain CI/CD pipelines to streamline development, testing, and deployment workflows.</li>
+                    <li>Support and mentor team members on best practices in code quality, automation, and performance engineering.</li>
+                    <li>Collaborate with cross-functional teams to define requirements, refine architecture, and deliver high-quality solutions.</li>
+                    <li>Create clear technical documentation, reports, and insights to support ongoing development and decision-making.</li>
+                  </ul>
+                </article>
+
+                <article class="job">
+                  <h3>Software Test Engineer: Automation — Hilti, Germany</h3>
+                  <p class="date">April 2021 — March 2024</p>
+                  <ul>
+                    <li>Develop and maintain automated test scripts using Selenium and TestNG.</li>
+                    <li>Design, develop and execute performance frameworks using Gatling.</li>
+                    <li>Execute and analyze test results to ensure software quality and reliability.</li>
+                  </ul>
+                </article>
+
+                <article class="job">
+                  <h3>Software Test Engineer: Automation — UBS, Poland</h3>
+                  <p class="date">August 2018 — March 2021</p>
+                  <ul>
+                    <li>Develop and improve automation frameworks for web and mobile applications.</li>
+                    <li>Configure and maintain CI pipelines to support automated builds and testing.</li>
+                    <li>Monitor, track, and prioritize defects to ensure timely resolution.</li>
+                    <li>Recommend practical quality improvements for processes and automation workflows.</li>
+                  </ul>
+                </article>
+
+                <article class="job">
+                  <h3>Software Test Engineer: Automation — IBM, Egypt</h3>
+                  <p class="date">July 2014 — July 2018</p>
+                  <ul>
+                    <li>Create and maintain automation frameworks for web and mobile applications.</li>
+                    <li>Track and manage defects throughout the development cycle.</li>
+                    <li>Prepare suggestions to improve overall quality and testing processes.</li>
+                  </ul>
+                </article>
+
+                <article class="job">
+                  <h3>Centralized Technical Support Engineer — IBM, Egypt</h3>
+                  <p class="date">May 2013 — June 2014</p>
+                  <ul>
+                    <li>Provided remote technical support for a company in Saudi Arabia.</li>
+                  </ul>
+                </article>
+              </section>
             </div>
-            <div class="contact">
-              <p><strong>Address:</strong> Landsberg, Germany</p>
-              <p><strong>Email:</strong> <a href="mailto:Zeyadelhodaiby@gmail.com">Zeyadelhodaiby@gmail.com</a></p>
-              <p><strong>Mobile:</strong> <a href="tel:+491748665309">+49 174 8665309</a></p>
+
+            <div class="card">
+              <section class="section skills">
+                <h2>Skills</h2>
+                <ul class="skills-list">
+                  <li>Selenium using Java</li>
+                  <li>Gatling</li>
+                  <li>Docker</li>
+                  <li>TestNG</li>
+                  <li>Jenkins</li>
+                  <li>Appium</li>
+                  <li>Robot &amp; Cucumber</li>
+                  <li>RestAssured</li>
+                </ul>
+              </section>
+
+              <section class="section education">
+                <h2>Education</h2>
+                <ul>
+                  <li><strong>Bachelor in Computer Science</strong> — Helwan University, July 2011 (Major: Software Engineering)</li>
+                  <li><strong>Rajac American School</strong> — American diploma 2007 (S.A.T I &amp; S.A.T II)</li>
+                </ul>
+              </section>
+
+              <section class="section certificates">
+                <h2>Certificates</h2>
+                <ul>
+                  <li>ISTQB</li>
+                  <li>CMAP</li>
+                  <li>IBM RFT</li>
+                  <li>ICAgile Professional</li>
+                </ul>
+              </section>
+
+              <section class="section languages">
+                <h2>Languages</h2>
+                <ul>
+                  <li>Arabic — Mother Tongue</li>
+                  <li>English — Fluent written and spoken</li>
+                  <li>German — Level B1</li>
+                </ul>
+              </section>
             </div>
-          </header>
+          </div>
+        </section>
 
-          <section class="section summary card">
-            <h2>Personal Summary</h2>
-            <p>With more than a decade of experience in software engineering, I lead automation and performance
-            initiatives across multiple domains. I focus on designing and building scalable automation
-            frameworks—not only for testing but for broader engineering workflows—while driving performance
-            optimization and system reliability. I also design and maintain CI/CD pipelines to streamline delivery
-            and ensure consistent, high-quality releases. Using technologies such as Selenium, Gatling, Java,
-            and TestNG, I help teams accelerate delivery, strengthen quality, and build maintainable,
-            high-impact automation solutions.</p>
-          </section>
-
-          <section class="section experience card">
-            <h2>Experience</h2>
-
-            <article class="job">
-              <h3>SW Automation and Performance Lead — Hilti, Germany</h3>
-              <p class="date">April 2024 — Present</p>
-              <ul>
-                <li>Design and develop scalable software components and automation frameworks using Java and modern tooling.</li>
-                <li>Implement performance-oriented solutions with Gatling and related technologies to ensure system efficiency and stability.</li>
-                <li>Build and maintain CI/CD pipelines to streamline development, testing, and deployment workflows.</li>
-                <li>Support and mentor team members on best practices in code quality, automation, and performance engineering.</li>
-                <li>Collaborate with cross-functional teams to define requirements, refine architecture, and deliver high-quality solutions.</li>
-                <li>Create clear technical documentation, reports, and insights to support ongoing development and decision-making.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <h3>Software Test Engineer: Automation — Hilti, Germany</h3>
-              <p class="date">April 2021 — March 2024</p>
-              <ul>
-                <li>Develop and maintain automated test scripts using Selenium and TestNG.</li>
-                <li>Design, develop and execute performance frameworks using Gatling.</li>
-                <li>Execute and analyze test results to ensure software quality and reliability.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <h3>Software Test Engineer: Automation — UBS, Poland</h3>
-              <p class="date">August 2018 — March 2021</p>
-              <ul>
-                <li>Develop and improve automation frameworks for web and mobile applications.</li>
-                <li>Configure and maintain CI pipelines to support automated builds and testing.</li>
-                <li>Monitor, track, and prioritize defects to ensure timely resolution.</li>
-                <li>Recommend practical quality improvements for processes and automation workflows.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <h3>Software Test Engineer: Automation — IBM, Egypt</h3>
-              <p class="date">July 2014 — July 2018</p>
-              <ul>
-                <li>Create and maintain automation frameworks for web and mobile applications.</li>
-                <li>Track and manage defects throughout the development cycle.</li>
-                <li>Prepare suggestions to improve overall quality and testing processes.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <h3>Centralized Technical Support Engineer — IBM, Egypt</h3>
-              <p class="date">May 2013 — June 2014</p>
-              <ul>
-                <li>Provided remote technical support for a company in Saudi Arabia.</li>
-              </ul>
-            </article>
-          </section>
-
-          <section class="section skills card">
-            <h2>Skills</h2>
-            <ul class="skills-list">
-              <li>Selenium using Java</li>
-              <li>Gatling</li>
-              <li>Docker</li>
-              <li>TestNG</li>
-              <li>Jenkins</li>
-              <li>Appium</li>
-              <li>Robot & Cucumber</li>
-              <li>RestAssured</li>
-            </ul>
-          </section>
-
-          <section class="section education card">
-            <h2>Education</h2>
-            <ul>
-              <li><strong>Bachelor in Computer Science</strong> — Helwan University, July 2011 (Major: Software Engineering)</li>
-              <li><strong>Rajac American School</strong> — American diploma 2007 (S.A.T I &amp; S.A.T II)</li>
-            </ul>
-          </section>
-
-          <section class="section certificates card">
-            <h2>Certificates</h2>
-            <ul>
-              <li>ISTQB</li>
-              <li>CMAP</li>
-              <li>IBM RFT</li>
-              <li>ICAgile Professional</li>
-            </ul>
-          </section>
-
-          <section class="section languages card">
-            <h2>Languages</h2>
-            <ul>
-              <li>Arabic — Mother Tongue</li>
-              <li>English — Fluent written and spoken</li>
-              <li>German — Level B1</li>
-            </ul>
-          </section>
-
-          <footer class="footer">
-            <p>Want changes or a PDF export? Open `index.html` in your browser and print to PDF.</p>
-          </footer>
-        </main>
+        <footer class="footer">
+          <p>Want changes or a PDF export? Open `index.html` in your browser and print to PDF.</p>
+        </footer>
       </div>
     </main>
   </div>
