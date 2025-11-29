@@ -4,50 +4,60 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Zeyad Elhodaiby — Resume</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:linear-gradient(135deg,#f7fbff,#f3f1ff 30%,#eaf5ff);
-      --surface:#ffffff;
-      --accent:#0b66c2;
-      --text:#0f172a;
-      --muted:#5b6470;
-      --border:#dbe6f2;
-      --shadow:0 16px 40px rgba(15,23,42,0.12);
-      --card-shadow:0 12px 30px rgba(15,23,42,0.10);
-      --radius:16px;
-    }
-    [data-theme="dark"]{
-      --bg:#0f172a;
+      --bg:#0d1117;
       --surface:#111827;
-      --accent:#3b82f6;
+      --accent:#22d3ee;
+      --accent-strong:#0ea5e9;
       --text:#e5e7eb;
       --muted:#9ca3af;
       --border:#1f2937;
-      --shadow:0 16px 40px rgba(0,0,0,0.35);
-      --card-shadow:0 12px 30px rgba(0,0,0,0.3);
+      --shadow:0 16px 40px rgba(34,211,238,0.15);
+      --card-shadow:0 12px 30px rgba(0,0,0,0.25);
+      --radius:16px;
+    }
+    [data-theme="dark"]{
+      --bg:#0d1117;
+      --surface:#111827;
+      --accent:#22d3ee;
+      --accent-strong:#0ea5e9;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:#1f2937;
+      --shadow:0 16px 40px rgba(34,211,238,0.15);
+      --card-shadow:0 12px 30px rgba(0,0,0,0.25);
     }
     *{box-sizing:border-box}
-    body{margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text);}
+    body{
+      margin:0;
+      font-family:"Space Grotesk","Inter",system-ui,-apple-system,'Segoe UI',sans-serif;
+      background:radial-gradient(circle at 10% 20%, rgba(34,211,238,0.08), transparent 25%), 
+                 radial-gradient(circle at 80% 0%, rgba(14,165,233,0.08), transparent 22%),
+                 var(--bg);
+      color:var(--text);
+    }
     a{text-decoration:none; color:inherit;}
     .page{min-height:100vh; display:flex; flex-direction:column;}
-    .top-bar{position:sticky; top:0; z-index:10; backdrop-filter:blur(10px); background:rgba(255,255,255,0.9); border-bottom:1px solid var(--border); box-shadow:0 8px 20px rgba(15,23,42,0.08);}
-    [data-theme="dark"] .top-bar{background:rgba(17,24,39,0.9);}
+    .top-bar{position:sticky; top:0; z-index:10; backdrop-filter:blur(10px); background:rgba(17,24,39,0.92); border-bottom:1px solid var(--border); box-shadow:0 10px 24px rgba(0,0,0,0.35);}
     .top-bar-inner{max-width:1100px; margin:0 auto; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
     .brand{font-weight:800; letter-spacing:0.3px; font-size:18px;}
     .top-actions{display:flex; gap:10px; align-items:center;}
     .btn{border:none; cursor:pointer; padding:10px 14px; border-radius:12px; font-weight:800; transition:transform 0.15s ease, filter 0.15s ease;}
-    .btn-primary{background:var(--accent); color:#fff; box-shadow:0 12px 26px rgba(11,102,194,0.22);}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-strong)); color:#0b1120; box-shadow:var(--shadow);}
     .btn-primary:hover{filter:brightness(0.95); transform:translateY(-1px);}
     .btn-ghost{background:var(--surface); color:var(--text); border:1px solid var(--border);}
     .btn-ghost:hover{filter:brightness(1.02);}
     main{flex:1;}
     .container{max-width:1100px; margin:0 auto; padding:22px 18px 44px; display:grid; gap:20px;}
-    .hero{background:var(--surface); border-radius:22px; box-shadow:var(--shadow); padding:24px; display:grid; gap:12px;}
+    .hero{background:var(--surface); border-radius:22px; box-shadow:var(--shadow); padding:24px; display:grid; gap:12px; border:1px solid var(--border);}
     .hero h1{margin:0; font-size:32px;}
     .hero p{margin:0; color:var(--muted); line-height:1.6;}
     .tags{display:flex; gap:8px; flex-wrap:wrap;}
-    .tag{background:rgba(11,102,194,0.12); color:var(--accent); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px;}
-    [data-theme="dark"] .tag{background:rgba(59,130,246,0.16);}
+    .tag{background:rgba(34,211,238,0.12); color:var(--accent-strong); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; border:1px solid rgba(34,211,238,0.25);}
     .grid{display:grid; grid-template-columns:1fr 0.8fr; gap:18px;}
     .card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:18px; border:1px solid var(--border); display:grid; gap:12px;}
     .card h2,.card h3{margin:0; color:var(--text);}
@@ -56,6 +66,89 @@
     ul{margin:8px 0; padding-left:18px;}
     li{margin:4px 0; line-height:1.4;}
     .footer{margin:30px 0 12px; text-align:center; color:var(--muted); font-size:13px;}
+    /* Chat widget */
+    .chat-toggle{
+      position:fixed;
+      bottom:20px;
+      right:20px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+      color:#0b1120;
+      border:none;
+      border-radius:999px;
+      padding:12px 16px;
+      font-weight:800;
+      box-shadow:var(--shadow);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      z-index:20;
+    }
+    .chat-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.45);
+      backdrop-filter:blur(6px);
+      display:none;
+      align-items:flex-end;
+      justify-content:flex-end;
+      z-index:25;
+    }
+    .chat-modal.active{display:flex;}
+    .chat-card{
+      width: min(420px, 92vw);
+      height: min(600px, 85vh);
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:16px;
+      margin:16px;
+      box-shadow:0 24px 48px rgba(0,0,0,0.35);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+    }
+    .chat-card header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      gap:8px;
+    }
+    .chat-card h3{margin:0; font-size:16px;}
+    .chat-actions{display:flex; gap:8px; align-items:center;}
+    .chat-btn{
+      border:1px solid var(--border);
+      background:var(--surface);
+      color:var(--text);
+      cursor:pointer;
+      padding:6px 10px;
+      border-radius:8px;
+      font-weight:600;
+    }
+    .chat-iframe{flex:1; border:0; width:100%;}
+    .chat-info{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+    }
+    .chat-info.active{display:flex;}
+    .chat-info-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      width:min(420px,90vw);
+      box-shadow:0 18px 36px rgba(0,0,0,0.35);
+    }
+    .chat-info-card h4{margin:0 0 8px; font-size:16px;}
+    .chat-info-card p{margin:0 0 8px; color:var(--muted); line-height:1.5;}
+    .chat-info-card ul{margin:8px 0 0 16px; color:var(--muted);}
     @media(max-width:900px){
       .grid{grid-template-columns:1fr;}
       .hero h1{font-size:28px;}
@@ -85,10 +178,6 @@
           </div>
           <h1>Zeyad Elhodaiby — SW Automation & Performance Lead</h1>
           <p>Delivering robust automation, performance engineering, and CI/CD at scale. Explore my resume, chat with my CV via RAG, or jump into the Car SQL Agent demo.</p>
-          <div class="cta-row">
-            <a class="btn btn-primary" href="./cv-chat.html">CV Chat Project</a>
-            <a class="btn btn-ghost" href="./cars-nl.html">Open Car SQL Agent</a>
-          </div>
         </section>
 
         <section class="grid">
@@ -203,7 +292,27 @@
         document.body.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
       });
+
+      // Chat modal
+      const chatToggle = document.getElementById('chat-toggle');
+      const chatModal = document.getElementById('chat-modal');
+      const chatClose = document.getElementById('chat-close');
+      if(chatToggle && chatModal && chatClose){
+        chatToggle.addEventListener('click', ()=> chatModal.classList.add('active'));
+        chatClose.addEventListener('click', ()=> chatModal.classList.remove('active'));
+        chatModal.addEventListener('click', (e)=>{ if(e.target === chatModal) chatModal.classList.remove('active'); });
+      }
     })();
   </script>
+  <button id="chat-toggle" class="chat-toggle" type="button">💬 Chat CV</button>
+  <div id="chat-modal" class="chat-modal" aria-hidden="true">
+    <div class="chat-card">
+      <header>
+        <h3>Ask Zeyad</h3>
+        <button id="chat-close" class="chat-close" type="button">Close</button>
+      </header>
+      <iframe class="chat-iframe" src="./cv-chat.html" title="CV Chat"></iframe>
+    </div>
+  </div>
 </body>
 </html>
